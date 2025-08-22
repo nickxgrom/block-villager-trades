@@ -1,4 +1,4 @@
 name: VillagerDontSellBooks
-version: '1.0-SNAPSHOT'
+version: '1.0'
 main: dev.nxgr.VillagerDontSellBooks.VillagerDontSellBooks
 api-version: '1.21.8'
