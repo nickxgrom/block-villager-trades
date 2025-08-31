@@ -7,10 +7,8 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.MerchantRecipe;
@@ -22,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
-
 
 public class BlockVillagerTrades extends JavaPlugin implements Listener {
     private List<Material> blockedTradesMaterials;
@@ -71,40 +67,35 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
                 getLogger().warning(String.format("Unknown item/enchantment in config.yml: %s", name));
             }
         }
-
-        System.out.println("items" +blockedTradesMaterials);
-        System.out.println("enchantments" +blockedTradesEnchantments);
     }
 
     @EventHandler
-    public void onTradeOpen(InventoryOpenEvent event) {
+    public void onTradeOpen(@NotNull InventoryOpenEvent event) {
         if (!(event.getInventory() instanceof MerchantInventory merchantInventory)) return;
-
-//        TODO: list of blocked recipes and delete or block depend on config
 
         Merchant merchant = merchantInventory.getMerchant();
         List<MerchantRecipe> recipes = new ArrayList<>(merchant.getRecipes());
 
-        for (MerchantRecipe recipe : recipes) {
-            System.out.println(recipe);
+        if (mode.equals("block")) {
+            recipes.forEach(recipe -> {
+                if (isBlocked(recipe)) recipe.setMaxUses(0);
+            });
+        } else {
+            recipes.removeIf(this::isBlocked);
+            merchant.setRecipes(recipes);
+        }
+    }
 
+    private boolean isBlocked(@NotNull MerchantRecipe recipe) {
+        Material resultType = recipe.getResult().getType();
+
+        if (blockedTradesMaterials.contains(resultType)) return true;
+
+        if (resultType == Material.ENCHANTED_BOOK &&
+                recipe.getResult().getItemMeta() instanceof EnchantmentStorageMeta meta) {
+            return blockedTradesEnchantments.stream().anyMatch(meta::hasStoredEnchant);
         }
 
-
-        recipes.removeIf(recipe -> {
-            Material resultType = recipe.getResult().getType();
-
-            if (blockedTradesMaterials.contains(resultType)) return true;
-
-            if (resultType == Material.ENCHANTED_BOOK &&
-                    recipe.getResult().getItemMeta() instanceof EnchantmentStorageMeta meta) {
-                for (Enchantment ench : blockedTradesEnchantments) {
-                    if (meta.hasStoredEnchant(ench)) return true;
-                }
-            }
-            return false;
-        });
-
-        merchant.setRecipes(recipes);
+        return false;
     }
 }
