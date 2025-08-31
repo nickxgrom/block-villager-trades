@@ -1,1 +1,1 @@
-rootProject.name = "VillagerDontSellBooks"
+rootProject.name = "BlockVillagerTrades"
