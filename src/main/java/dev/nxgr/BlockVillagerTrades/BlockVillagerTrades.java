@@ -15,7 +15,7 @@ import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNull; 
 
 import java.util.*;
 
@@ -36,14 +36,16 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onTradeOpen(@NotNull InventoryOpenEvent event) {
-        if (!(event.getInventory() instanceof MerchantInventory merchantInventory)) return;
+        if (!(event.getInventory() instanceof MerchantInventory merchantInventory))
+            return;
 
         Merchant merchant = merchantInventory.getMerchant();
         List<MerchantRecipe> recipes = new ArrayList<>(merchant.getRecipes());
 
         if (mode.equals("block")) {
             recipes.forEach(recipe -> {
-                if (isBlocked(recipe)) recipe.setMaxUses(0);
+                if (isBlocked(recipe))
+                    recipe.setMaxUses(0);
             });
         } else {
             recipes.removeIf(this::isBlocked);
@@ -57,7 +59,8 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
         blockedTradesMaterials = new HashSet<>();
         blockedTradesEnchantments = new HashSet<>();
 
-        Registry<@NotNull Enchantment> enchantmentRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT);
+        Registry<@NotNull Enchantment> enchantmentRegistry = RegistryAccess.registryAccess()
+                .getRegistry(RegistryKey.ENCHANTMENT);
 
         for (String name : itemNames) {
             try {
@@ -86,7 +89,8 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
     private boolean isBlocked(@NotNull MerchantRecipe recipe) {
         Material resultType = recipe.getResult().getType();
 
-        if (blockedTradesMaterials.contains(resultType)) return true;
+        if (blockedTradesMaterials.contains(resultType))
+            return true;
 
         if (resultType == Material.ENCHANTED_BOOK &&
                 recipe.getResult().getItemMeta() instanceof EnchantmentStorageMeta meta) {
