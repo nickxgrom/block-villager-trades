@@ -1,50 +1,46 @@
 package dev.nxgr.BlockVillagerTrades;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 public class BlockVillagerTrades extends JavaPlugin implements Listener {
-    private Set<Material> blockedTradesMaterials;
     private Set<BlockedItem> blockedTradesSet = new HashSet<>();
-    private Set<Enchantment> blockedTradesEnchantments;
     private String mode;
 
     private Set<Material> itemsWithEnchantments = new HashSet<>(Arrays.asList(
+            Material.ENCHANTED_BOOK,
             Material.BOW,
             Material.CROSSBOW,
-            Material.IRON_SWORD,
             Material.DIAMOND_SWORD,
-            Material.IRON_AXE,
             Material.DIAMOND_AXE,
-            Material.IRON_PICKAXE,
             Material.DIAMOND_PICKAXE,
-            Material.IRON_SHOVEL,
             Material.DIAMOND_SHOVEL,
-            Material.IRON_HOE,
             Material.DIAMOND_HOE,
-            Material.IRON_HELMET,
             Material.DIAMOND_HELMET,
-            Material.IRON_CHESTPLATE,
             Material.DIAMOND_CHESTPLATE,
-            Material.IRON_LEGGINGS,
             Material.DIAMOND_LEGGINGS,
-            Material.IRON_BOOTS,
-            Material.DIAMOND_BOOTS));
+            Material.DIAMOND_BOOTS,
+            Material.IRON_SWORD,
+            Material.IRON_AXE,
+            Material.IRON_PICKAXE,
+            Material.IRON_SHOVEL,
+            Material.IRON_HOE,
+            Material.IRON_HELMET,
+            Material.IRON_CHESTPLATE,
+            Material.IRON_LEGGINGS,
+            Material.IRON_BOOTS));
 
     @Override
     public void onEnable() {
@@ -52,7 +48,6 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
 
         saveDefaultConfig();
         loadBlockedItems();
-        loadBlockedItems2();
 
         mode = "delete".equalsIgnoreCase(getConfig().getString("mode")) ? "delete" : "block";
     }
@@ -76,7 +71,7 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
         }
     }
 
-    private void loadBlockedItems2() {
+    private void loadBlockedItems() {
         List<?> blockedItemsRaw = getConfig().getList("blocked-items", Collections.emptyList());
 
         for (Object obj : blockedItemsRaw) {
@@ -124,58 +119,42 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
                 getLogger().warning(String.format("Unknown item/enchantment in config.yml: %s", obj));
             }
         }
-
-        for (BlockedItem item : blockedTradesSet) {
-            System.out.println(item.getMaterial());
-            for (PluginEnchantment ench : item.getEnchantments()) {
-                System.out.println(" - " + ench.getEnchantment() + ": " + ench.getLevel());
-            }
-            System.out.println("--------");
-        }
-    }
-
-    private void loadBlockedItems() {
-        List<String> itemNames = getConfig().getStringList("items");
-
-        blockedTradesMaterials = new HashSet<>();
-        blockedTradesEnchantments = new HashSet<>();
-
-        Registry<Enchantment> enchantmentRegistry = RegistryAccess.registryAccess()
-                .getRegistry(RegistryKey.ENCHANTMENT);
-
-        for (String name : itemNames) {
-            try {
-                String[] materialParts = name.split(":");
-                Material material = Material.valueOf(materialParts[0].toUpperCase());
-
-                if (material == Material.ENCHANTED_BOOK && materialParts.length > 1) {
-                    NamespacedKey namespacedKey = NamespacedKey.minecraft(materialParts[1].toLowerCase());
-
-                    Enchantment ench = enchantmentRegistry.get(namespacedKey);
-
-                    if (ench == null) {
-                        throw new IllegalArgumentException("Unknown enchantment");
-                    } else {
-                        blockedTradesEnchantments.add(ench);
-                    }
-                } else {
-                    blockedTradesMaterials.add(material);
-                }
-            } catch (IllegalArgumentException e) {
-                getLogger().warning(String.format("Unknown item/enchantment in config.yml: %s", name));
-            }
-        }
     }
 
     private boolean isBlocked(@NotNull MerchantRecipe recipe) {
         Material resultType = recipe.getResult().getType();
 
-        if (blockedTradesMaterials.contains(resultType))
-            return true;
+        for (BlockedItem blockedItem : blockedTradesSet) {
+            if (blockedItem.getMaterial() != resultType)
+                continue;
 
-        if (resultType == Material.ENCHANTED_BOOK &&
-                recipe.getResult().getItemMeta() instanceof EnchantmentStorageMeta meta) {
-            return blockedTradesEnchantments.stream().anyMatch(meta::hasStoredEnchant);
+            Set<PluginEnchantment> blockedEnchants = blockedItem.getEnchantments();
+            if (blockedEnchants.isEmpty())
+                return true;
+
+            if (itemsWithEnchantments.contains(resultType)) {
+                if (recipe.getResult().getItemMeta() == null)
+                    return false;
+
+                Map<Enchantment, Integer> itemEnchants = new HashMap<>(recipe.getResult().getItemMeta().getEnchants());
+
+                if (recipe.getResult().getItemMeta() instanceof EnchantmentStorageMeta storageMeta) {
+                    itemEnchants.putAll(storageMeta.getStoredEnchants());
+                }
+
+                for (PluginEnchantment blockedEnchant : blockedEnchants) {
+                    if (itemEnchants.containsKey(blockedEnchant.getEnchantment())) {
+                        Integer itemEnchantLevel = itemEnchants.get(blockedEnchant.getEnchantment());
+                        Integer blockedEnchantLevel = blockedEnchant.getLevel();
+
+                        if (blockedEnchantLevel == null || Objects.equals(itemEnchantLevel, blockedEnchantLevel)) {
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                return true;
+            }
         }
 
         return false;
