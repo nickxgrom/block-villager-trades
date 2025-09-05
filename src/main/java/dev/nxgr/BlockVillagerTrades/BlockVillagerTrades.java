@@ -69,6 +69,8 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
             recipes.removeIf(this::isBlocked);
             merchant.setRecipes(recipes);
         }
+        // if every recipe is blocked, there is a unexpected behavior where the villager
+        // is trading nothing and not tradable anymore
     }
 
     private void loadBlockedItems() {
