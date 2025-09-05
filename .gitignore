@@ -5,3 +5,4 @@ gradle/
 /.kotlin
 /run
 /out
+/.vscode
