@@ -1,4 +1,4 @@
-package dev.nxgr.BlockVillagerTrades;
+package dev.evenfine.BlockVillagerTrades;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -49,7 +49,7 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
         saveDefaultConfig();
         loadBlockedItems();
 
-        mode = "delete".equalsIgnoreCase(getConfig().getString("mode")) ? "delete" : "block";
+        mode = "remove".equalsIgnoreCase(getConfig().getString("mode")) ? "remove" : "block";
     }
 
     @EventHandler
@@ -65,7 +65,7 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
                 if (isBlocked(recipe))
                     recipe.setMaxUses(0);
             });
-        } else {
+        } else if (mode.equals("remove")) {
             recipes.removeIf(this::isBlocked);
             merchant.setRecipes(recipes);
         }

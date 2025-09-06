@@ -1,1 +1,1 @@
-rootProject.name = "BlockVillagerTrades"
+rootProject.name = "block-villager-trades"
