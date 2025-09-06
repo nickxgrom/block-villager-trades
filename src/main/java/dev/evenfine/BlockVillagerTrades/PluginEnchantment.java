@@ -1,4 +1,4 @@
-package dev.nxgr.BlockVillagerTrades;
+package dev.evenfine.BlockVillagerTrades;
 
 import org.bukkit.enchantments.Enchantment;
 

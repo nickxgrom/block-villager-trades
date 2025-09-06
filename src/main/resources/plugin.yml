@@ -1,4 +1,6 @@
 name: BlockVillagerTrades
-version: '1.1'
-main: dev.nxgr.BlockVillagerTrades.BlockVillagerTrades
-api-version: '1.21.8'
+description: A plugin to block/remove villager trades based on a configurable list of items and enchantments.
+author: evenfine
+version: '1.0.0'
+main: dev.evenfine.BlockVillagerTrades.BlockVillagerTrades
+api-version: '1.21'
