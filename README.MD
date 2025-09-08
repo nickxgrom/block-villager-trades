@@ -1,6 +1,6 @@
-# VillagerTradeBlocker
+# Block Villager Trades
 
-VillagerTradeBlocker — a plugin that allows you to block or remove villager trades based on a configurable list of items and enchantments.
+Block Villager Trades — a plugin that allows you to block or remove villager trades based on a configurable list of items and enchantments.
 
 ## ✨ Features
 
