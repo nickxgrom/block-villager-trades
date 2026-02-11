@@ -3,6 +3,7 @@ package dev.evenfine.BlockVillagerTrades;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -18,6 +19,7 @@ import java.util.*;
 public class BlockVillagerTrades extends JavaPlugin implements Listener {
     private Set<BlockedItem> blockedTradesSet = new HashSet<>();
     private String mode;
+    private Boolean blockWanderingTraderItems = false;
 
     private Set<Material> itemsWithEnchantments = new HashSet<>(Arrays.asList(
             Material.ENCHANTED_BOOK,
@@ -50,12 +52,18 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
         loadBlockedItems();
 
         mode = "remove".equalsIgnoreCase(getConfig().getString("mode")) ? "remove" : "block";
+        blockWanderingTraderItems = getConfig().getBoolean("block-wandering-trader-items", false);
     }
 
     @EventHandler
     public void onTradeOpen(@NotNull InventoryOpenEvent event) {
+
         if (!(event.getInventory() instanceof MerchantInventory merchantInventory))
             return;
+
+        if (!blockWanderingTraderItems && merchantInventory.getMerchant() instanceof WanderingTrader) {
+            return;
+        }
 
         Merchant merchant = merchantInventory.getMerchant();
         List<MerchantRecipe> recipes = new ArrayList<>(merchant.getRecipes());

@@ -4,10 +4,12 @@
 # "block" set maxUses for item to 0
 # "remove" removes the trade completely. WARNING: This will delete trades permanently and not restore them when the item is removed from the blocked list.
 mode: block
+block-wandering-trader-items: false
 
 blocked-items:
   # # you can block items by their material name
-  # - EMERALD
+   - EMERALD
+   - slimeball
   # - ENCHANTED_BOOK:
   #     # you can also block specific enchantments on items
   #     enchantments:
