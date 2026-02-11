@@ -1,7 +1,9 @@
 package dev.evenfine.BlockVillagerTrades;
 
+import dev.evenfine.BlockVillagerTrades.commands.ReloadCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
@@ -47,17 +49,13 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, this);
-
         saveDefaultConfig();
-        loadBlockedItems();
-
-        mode = "remove".equalsIgnoreCase(getConfig().getString("mode")) ? "remove" : "block";
-        blockWanderingTraderItems = getConfig().getBoolean("block-wandering-trader-items", false);
+        getCommand("blockvillagertrades_reload").setExecutor(new ReloadCommand(this));
+        loadConfiguration(null);
     }
 
     @EventHandler
     public void onTradeOpen(@NotNull InventoryOpenEvent event) {
-
         if (!(event.getInventory() instanceof MerchantInventory merchantInventory))
             return;
 
@@ -81,7 +79,27 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
         // is trading nothing and not tradable anymore
     }
 
-    private void loadBlockedItems() {
+    public void loadConfiguration(CommandSender sender) {
+        try {
+            reloadConfig();
+            mode = "remove".equalsIgnoreCase(getConfig().getString("mode")) ? "remove" : "block";
+            blockWanderingTraderItems = getConfig().getBoolean("block-wandering-trader-items", false);
+            loadBlockedItems(sender);
+
+            if (sender != null) {
+                sender.sendMessage("§aConfiguration reloaded successfully.");
+            }
+            getLogger().info("Configuration reloaded successfully.");
+        } catch (Exception e) {
+            if (sender != null) {
+                sender.sendMessage("§cError loading configuration. Check console for details.");
+            }
+            getLogger().warning("Error loading configuration. Check config.yml for errors.");
+        }
+    }
+
+    private void loadBlockedItems(CommandSender sender) throws Exception {
+        blockedTradesSet.clear();
         List<?> blockedItemsRaw = getConfig().getList("blocked-items", Collections.emptyList());
 
         for (Object obj : blockedItemsRaw) {
@@ -126,7 +144,12 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
                     }
                 }
             } catch (Exception e) {
+                if (sender != null) {
+                    sender.sendMessage(String.format("§cUnknown item/enchantment in config.yml: %s", obj));
+                }
+
                 getLogger().warning(String.format("Unknown item/enchantment in config.yml: %s", obj));
+                throw new Exception();
             }
         }
     }

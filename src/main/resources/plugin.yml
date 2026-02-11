@@ -4,3 +4,12 @@ author: evenfine
 version: '1.0.0'
 main: dev.evenfine.BlockVillagerTrades.BlockVillagerTrades
 api-version: '1.21'
+commands:
+  blockvillagertrades_reload:
+    description: Reload BlockVillagerTrades config.
+    usage: /bvt reload
+    permission: blockvillagertrades.reload
+  permissions:
+    blocktrades.reload:
+      description: Allows reloading the plugin configuration
+      default: op

@@ -27,10 +27,6 @@ public class BlockedItem {
         return material;
     }
 
-    public void setMaterial(Material material) {
-        this.material = material;
-    }
-
     public void addEnchantment(String enchantmentName, Integer level) {
         NamespacedKey namespacedKey = NamespacedKey.minecraft(enchantmentName.toLowerCase());
         Enchantment ench = enchantmentRegistry.get(namespacedKey);
