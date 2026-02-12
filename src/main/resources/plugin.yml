@@ -1,15 +1,15 @@
 name: BlockVillagerTrades
 description: A plugin to block/remove villager trades based on a configurable list of items and enchantments.
 author: evenfine
-version: '1.0.0'
+version: '1.1.0'
 main: dev.evenfine.BlockVillagerTrades.BlockVillagerTrades
 api-version: '1.21'
 commands:
-  blockvillagertrades_reload:
-    description: Reload BlockVillagerTrades config.
+  bvt:
+    description:  Reload BlockVillagerTrades config.
     usage: /bvt reload
     permission: blockvillagertrades.reload
-  permissions:
-    blocktrades.reload:
-      description: Allows reloading the plugin configuration
-      default: op
+permissions:
+  blockvillagertrades.reload:
+    description: Allows reloading the plugin configuration
+    default: op

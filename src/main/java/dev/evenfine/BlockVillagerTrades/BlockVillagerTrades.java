@@ -50,7 +50,7 @@ public class BlockVillagerTrades extends JavaPlugin implements Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
-        getCommand("blockvillagertrades_reload").setExecutor(new ReloadCommand(this));
+        getCommand("bvt").setExecutor(new ReloadCommand(this));
         loadConfiguration(null);
     }
 
